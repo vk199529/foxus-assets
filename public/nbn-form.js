@@ -3,33 +3,31 @@
 // PLANS CONFIG
 // ══════════════════════════════════
 const NBN_PLANS = {
-  'momentom': {
-    tag: 'Momentom',
-    data: '50 Mbps / 20 Mbps',
-    introPrice: 70,
-    ongoingPrice: 70
+
+  'momentom':{
+    tag:'Momentom',
+    data:'50 Mbps / 20 Mbps',
+    price:70
   },
 
-  'navigator': {
-    tag: 'Navigator',
-    data: '100 Mbps / 20 Mbps',
-    introPrice: 75,
-    ongoingPrice: 85
+  'navigator':{
+    tag:'Navigator',
+    data:'100 Mbps / 20 Mbps',
+    price:75
   },
 
-  'mach-1': {
-    tag: 'Mach 1',
-    data: '250 Mbps / 25 Mbps',
-    introPrice: 85,
-    ongoingPrice: 100
+  'mach-1':{
+    tag:'Mach 1',
+    data:'250 Mbps / 25 Mbps',
+    price:85
   },
 
-  'lightning-click': {
-    tag: 'Lightning Click',
-    data: '500–1000 Mbps / 50 Mbps',
-    introPrice: 95,
-    ongoingPrice: 120
+  'lightning-click':{
+    tag:'Lightning Click',
+    data:'500-1000 Mbps / 50 Mbps',
+    price:95
   }
+
 };
 // ══════════════════════════════════
 // STATE
