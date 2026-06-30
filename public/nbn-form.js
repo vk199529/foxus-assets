@@ -52,7 +52,11 @@ function getDefaultState() {
     dob: '',
     address: '',
 
-    companyName: '',
+     companyName: '',
+     tradingName: '',
+     abn: '',
+     dobBiz: '',
+     bizAddress: '',
 
     installAddr: '',
     activationDate: '',
@@ -346,16 +350,21 @@ function validateStep1() {
       if (!ok) valid = false;
     });
     if (valid) {
-      nbnState.firstName   = document.getElementById('companyName').value.trim();
-        nbnState.companyName = document.getElementById('companyName').value.trim();
+            nbnState.firstName = '';
+            nbnState.lastName = '';
 
-        nbnState.email = document.getElementById('bizEmail').value.trim();
-        nbnState.phone = document.getElementById('bizPhone').value.trim();
+            nbnState.companyName = document.getElementById('companyName').value.trim();
 
-        nbnState.tradingName = document.getElementById('tradingName').value.trim();
-        nbnState.abn = document.getElementById('abn').value.trim();
-        nbnState.dob = document.getElementById('dobBiz').value;
-        nbnState.address = document.getElementById('bizAddress').value.trim();
+            nbnState.email = document.getElementById('bizEmail').value.trim();
+            nbnState.phone = document.getElementById('bizPhone').value.trim();
+
+            nbnState.tradingName = document.getElementById('tradingName').value.trim();
+            nbnState.abn = document.getElementById('abn').value.trim();
+
+            nbnState.dob = document.getElementById('dobBiz').value;
+            nbnState.dobBiz = document.getElementById('dobBiz').value;
+
+            nbnState.address = document.getElementById('bizAddress').value.trim();
     }
   }
   if (valid) { saveNbnState(); goTo(2); }
@@ -543,6 +552,18 @@ const payload = {
   phone: nbnState.phone || '',
   acctType: nbnState.acctType,
 
+  // Personal Details
+  firstName: nbnState.firstName || '',
+  lastName: nbnState.lastName || '',
+
+  // Business Details
+  companyName: nbnState.companyName || '',
+  tradingName: nbnState.tradingName || '',
+  abn: nbnState.abn || '',
+  dob: nbnState.acctType === 'business'
+    ? nbnState.dobBiz
+    : nbnState.dob,
+
   // plan
   planName: p.tag + ' NBN',
   planSpeed: p.data,
@@ -562,10 +583,6 @@ const payload = {
     : nbnState.activationDate,
   asap: nbnState.asap,
   ntd: nbnState.ntd,
-
-  // customer details
-  firstName: nbnState.firstName || '',
-  lastName: nbnState.lastName || '',
 
   // debugging
   source: 'webflow-nbn-signup'
