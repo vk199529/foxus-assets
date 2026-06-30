@@ -310,7 +310,8 @@ function validateStep1() {
       { id:'firstName', v: x => x.trim().length > 0 },
       { id:'lastName',  v: x => x.trim().length > 0 },
       { id:'email',     v: x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
-	  { id: 'phone', v: x => /^[+]?[0-9\s()-]{10,15}$/.test(x.trim())},
+	//   { id: 'phone', v: x => /^[+]?[0-9\s()-]{10,15}$/.test(x.trim())},
+      {id: 'phone', v: x => x.trim() !== ''},
       { id:'dob',       v: x => x && (Date.now()-new Date(x))/(365.25*24*3600*1000) >= 18 },
       { id:'address',   v: x => x.trim().length > 5 }
     ];
@@ -336,7 +337,8 @@ function validateStep1() {
     const checks = [
         { id:'companyName', v: x => x.trim().length > 0 },
         { id:'bizEmail',    v: x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
-        { id:'bizPhone',    v: x => /^[+]?[0-9\s()-]{10,15}$/.test(x.trim()) },
+        // { id:'bizPhone',    v: x => /^[+]?[0-9\s()-]{10,15}$/.test(x.trim()) },
+        {id: 'bizPhone', v: x => x.trim() !== ''},
         { id:'abn',         v: x => x.trim().length > 0 },
         { id:'dobBiz',      v: x => x && (Date.now()-new Date(x))/(365.25*24*3600*1000) >= 18 },
         { id:'bizAddress',  v: x => x.trim().length > 5 }
