@@ -167,6 +167,12 @@ function restoreFormValues() {
   set('companyName', nbnState.companyName);
   set('installAddr', nbnState.installAddr);
   set('activationDate', nbnState.activationDate);
+  set('bizEmail', nbnState.email);
+  set('bizPhone', nbnState.phone);
+  set('tradingName', nbnState.tradingName);
+  set('abn', nbnState.abn);
+  set('dobBiz', nbnState.dob);
+  set('bizAddress', nbnState.address);
 
   // Restore account type
   selectAcct(nbnState.acctType || 'personal');
@@ -303,10 +309,13 @@ function validateStep1() {
     document.getElementById('fields-personal').style.display = 'none';
     document.getElementById('fields-business').style.display = '';
     const checks = [
-      { id:'companyName', v: x => x.trim().length > 0 },
-      { id:'abn',         v: x => x.trim().length > 0 },
-      { id:'bizAddress',  v: x => x.trim().length > 5 }
-    ];
+        { id:'companyName', v: x => x.trim().length > 0 },
+        { id:'bizEmail',    v: x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
+        { id:'bizPhone',    v: x => /^[+]?[0-9\s()-]{10,15}$/.test(x.trim()) },
+        { id:'abn',         v: x => x.trim().length > 0 },
+        { id:'dobBiz',      v: x => x && (Date.now()-new Date(x))/(365.25*24*3600*1000) >= 18 },
+        { id:'bizAddress',  v: x => x.trim().length > 5 }
+        ];
     checks.forEach(c => {
       const inp = document.getElementById(c.id);
       const err = document.getElementById(c.id + '-err');
@@ -317,8 +326,15 @@ function validateStep1() {
     });
     if (valid) {
       nbnState.firstName   = document.getElementById('companyName').value.trim();
-      nbnState.companyName = document.getElementById('companyName').value.trim();
-      nbnState.email       = '';
+        nbnState.companyName = document.getElementById('companyName').value.trim();
+
+        nbnState.email = document.getElementById('bizEmail').value.trim();
+        nbnState.phone = document.getElementById('bizPhone').value.trim();
+
+        nbnState.tradingName = document.getElementById('tradingName').value.trim();
+        nbnState.abn = document.getElementById('abn').value.trim();
+        nbnState.dob = document.getElementById('dobBiz').value;
+        nbnState.address = document.getElementById('bizAddress').value.trim();
     }
   }
   if (valid) { saveNbnState(); goTo(2); }
