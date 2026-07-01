@@ -26,8 +26,7 @@ function getDefaultMobileState() {
     asap: false,
 
     phone: '',
-    countryCode: '+61',
-
+    
     firstName: '',
     lastName: '',
     email: '',
