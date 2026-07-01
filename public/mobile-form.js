@@ -424,7 +424,7 @@ async function processPayment() {
       phone:     mState.phone || mState.phone1 || '',
       phone1:    mState.phone1 || '',
       acctType:  mState.acctType,
-      plan:      p.tag,
+      planName:      p.tag,
       price:     p.price,
       stripeAmount: p.price * 100,
       simType:   mState.simType,
