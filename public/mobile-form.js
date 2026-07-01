@@ -272,14 +272,33 @@ async function sendOtp() {
   const errEl = document.getElementById('phone-err');
   const inp   = document.getElementById('phoneNumber');
 
+  // Validate — must not be empty
   if (!phone) {
     inp.classList.add('err');
     errEl.textContent = 'Please enter your mobile number.';
     errEl.classList.add('show');
     return;
   }
+
+  // Validate format — accept +61, +91, 04xx or any international +XX format
+  const cleaned = phone.replace(/\s/g, '');
+  const isAU    = /^(\+61|0)[4-5]\d{8}$/.test(cleaned);
+  const isIN    = /^\+91[6-9]\d{9}$/.test(cleaned);
+  const isIntl  = /^\+\d{7,15}$/.test(cleaned);
+
+  if (!isAU && !isIN && !isIntl) {
+    inp.classList.add('err');
+    errEl.textContent = 'Please enter a valid number. e.g. +61 412 345 678 or +91 98765 43210';
+    errEl.classList.add('show');
+    return;
+  }
+
   inp.classList.remove('err');
   errEl.classList.remove('show');
+
+  // Disable button while sending
+  const btn = document.getElementById('send-otp-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="opacity:.7">Sending...</span>'; }
 
   try {
     const res  = await fetch("https://hook.eu1.make.com/3rgtnkjfl6urr2tgg5r69xly6w3orx3t", {
@@ -290,19 +309,21 @@ async function sendOtp() {
     const data = await res.json();
     if (data.success) {
       document.getElementById('otp-sent-to').textContent = 'Code sent to ' + phone;
-      document.getElementById('otp-box').style.display = 'block';
-      document.getElementById('otp-nav').style.display = 'block';
-      document.getElementById('send-otp-btn').textContent = 'Resend code';
+      document.getElementById('otp-box').style.display  = 'block';
+      document.getElementById('otp-nav').style.display  = 'block';
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Resend code'; }
       document.getElementById('otp0').focus();
       mState.phone = phone;
       saveState();
     } else {
-      errEl.textContent = 'Could not send code. Please try again.';
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Next <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'; }
+      errEl.textContent = 'Could not send code. Please check your number and try again.';
       errEl.classList.add('show');
     }
   } catch(e) {
     console.error(e);
-    errEl.textContent = 'Error sending code. Please try again.';
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Next <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'; }
+    errEl.textContent = 'Could not send code. Please try again.';
     errEl.classList.add('show');
   }
 }
