@@ -1,4 +1,3 @@
-console.log("mobile flow working");
 // ══════════════════════════════════
 // PLANS
 // ══════════════════════════════════
@@ -12,24 +11,43 @@ const MOBILE_PLANS = {
 // ══════════════════════════════════
 // STATE
 // ══════════════════════════════════
-let mState = {
-  acctType:       'personal',
-  selectedPlan:   null,
-  portNumber:     'yes',
-  currentCarrier: '',
-  simType:        'physical',
-  activationDate: '',
-  asap:           false,
-  phone:          '',
-  countryCode:    '+61',
-  firstName:      '',
-  lastName:       '',
-  email:          '',
-  dob:            '',
-  address:        '',
-  companyName:    '',
-  currentStep:    0
-};
+function getDefaultMobileState() {
+  return {
+    acctType: 'personal',
+
+    selectedPlan: null,
+
+    portNumber: 'yes',
+    currentCarrier: '',
+
+    simType: 'physical',
+
+    activationDate: '',
+    asap: false,
+
+    phone: '',
+    countryCode: '+61',
+
+    firstName: '',
+    lastName: '',
+    email: '',
+    dob: '',
+    address: '',
+
+    companyName: '',
+    tradingName: '',
+    bizEmail: '',
+    bizPhone: '',
+    abn: '',
+    dobBiz: '',
+    bizAddress: '',
+
+    currentStep: 0
+  };
+}
+
+let mState = getDefaultMobileState();
+
 
 let kycPollTimer  = null;
 let kycVerId      = null;
@@ -45,9 +63,16 @@ function loadState() {
   try {
     const saved = localStorage.getItem('foxus_mobile_state');
     if (saved) {
-      const p = JSON.parse(saved);
-      if (p.currentStep < 6) { mState = { ...mState, ...p }; return true; }
-    }
+
+    const p = JSON.parse(saved);
+
+    mState = {
+        ...getDefaultMobileState(),
+        ...p
+    };
+
+    return true;
+}
   } catch(e) {}
   return false;
 }
@@ -56,47 +81,78 @@ function loadState() {
 // INIT
 // ══════════════════════════════════
 function init() {
-  const params    = new URLSearchParams(window.location.search);
-  const planParam = params.get('plan') || '';
-  const success   = params.get('success');
 
-  // Stripe success return
-  if (success === '1' || localStorage.getItem('foxus_mobile_done') === '1') {
-    localStorage.removeItem('foxus_mobile_done');
-    showSuccess();
-    goTo(6);
-    window.history.replaceState({}, document.title, '/signup-mobile');
-    return;
+  const params = new URLSearchParams(window.location.search);
+
+  const planParam = params.get('plan');
+  const success = params.get('success');
+
+  // Stripe Success
+  if (
+      success === '1' ||
+      localStorage.getItem('foxus_mobile_done') === '1'
+  ) {
+
+      localStorage.removeItem('foxus_mobile_done');
+
+      showSuccess();
+
+      goTo(6);
+
+      setTimeout(() => {
+          localStorage.removeItem('foxus_mobile_state');
+          mState = getDefaultMobileState();
+
+          window.location.href = "/mobile-plan";
+      }, 4000);
+
+      window.history.replaceState(
+          {},
+          document.title,
+          "/signup-mobile"
+      );
+
+      return;
   }
 
-  // No plan → redirect to plans page
+  // Invalid plan
   if (!planParam || !MOBILE_PLANS[planParam]) {
-    localStorage.removeItem('foxus_mobile_state');
-    window.location.href = '/mobile-plan';
-    return;
+
+      localStorage.removeItem("foxus_mobile_state");
+
+      window.location.href = "/mobile-plan";
+
+      return;
   }
 
-  // Plan in URL = fresh start
-  if (planParam) {
-    localStorage.removeItem('foxus_mobile_state');
-    mState.selectedPlan = MOBILE_PLANS[planParam];
-    mState.currentStep  = 0;
-    updateOrderSummary();
-    saveState();
-    goTo(0);
-    return;
+  // Restore existing session
+  const restored = loadState();
+
+  if (
+      restored &&
+      mState.currentStep < 6
+  ) {
+
+      restoreFormValues();
+
+      updateOrderSummary();
+
+      goTo(mState.currentStep || 0);
+
+      return;
   }
 
-  // Restore
-  if (loadState() && mState.selectedPlan) {
-    restoreFormValues();
-    updateOrderSummary();
-    goTo(mState.currentStep || 0);
-  } else {
-    mState.selectedPlan = MOBILE_PLANS[planParam] || MOBILE_PLANS['everyday'];
-    updateOrderSummary();
-    goTo(0);
-  }
+  // Fresh signup
+  mState.selectedPlan = MOBILE_PLANS[planParam];
+
+  mState.currentStep = 0;
+
+  saveState();
+
+  updateOrderSummary();
+
+  goTo(0);
+
 }
 
 function restoreFormValues() {
@@ -442,10 +498,16 @@ async function processPayment() {
     const p = mState.selectedPlan;
     const payload = {
       flow:      'mobile',
+
       email:     mState.email,
       phone:     mState.phone || mState.phone1 || '',
       phone1:    mState.phone1 || '',
       acctType:  mState.acctType,
+
+      firstName: mState.firstName || '',
+      lastName:  mState.lastName  || '',
+
+
       planName:      p.tag,
       price:     p.price,
       stripeAmount: p.price * 100,
@@ -454,8 +516,7 @@ async function processPayment() {
       currentCarrier: mState.currentCarrier || '',
       activationDate: mState.asap ? null : mState.activationDate,
       asap:      mState.asap,
-      firstName: mState.firstName || '',
-      lastName:  mState.lastName  || '',
+    
       address:   mState.address   || '',
       source:    'webflow-mobile-signup'
     };
