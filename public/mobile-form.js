@@ -127,6 +127,11 @@ function init() {
 
   // Restore existing session
   const restored = loadState();
+  if (!mState.selectedPlan && MOBILE_PLANS[planParam]) {
+    mState.selectedPlan = MOBILE_PLANS[planParam];
+}
+
+saveState();
 
   if (
       restored &&
@@ -156,22 +161,44 @@ function init() {
 }
 
 function restoreFormValues() {
-  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
-  set('firstName',      mState.firstName);
-  set('lastName',       mState.lastName);
-  set('email',          mState.email);
-  set('dob',            mState.dob);
-  set('phone1',         mState.phone1);
-  set('address',        mState.address);
-  set('companyName',    mState.companyName);
-  set('bizEmail',       mState.bizEmail);
-  set('bizPhone',       mState.bizPhone || mState.phone1);
-  set('currentCarrier', mState.currentCarrier);
-  set('activationDate', mState.activationDate === 'ASAP' ? '' : mState.activationDate);
-  selectAcct(mState.acctType || 'personal');
-  selectPort(mState.portNumber || 'yes');
-  selectSim(mState.simType || 'physical');
-  if (mState.asap) { mState.asap = false; toggleAsap(); }
+
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val) el.value = val;
+    };
+
+    // Personal
+    set('firstName', mState.firstName);
+    set('lastName', mState.lastName);
+    set('email', mState.email);
+    set('dob', mState.dob);
+    set('phone1', mState.phone);
+    set('address', mState.address);
+
+    // Business
+    set('companyName', mState.companyName);
+    set('tradingName', mState.tradingName);
+    set('abn', mState.abn);
+    set('dobBiz', mState.dobBiz);
+    set('bizEmail', mState.email);
+    set('bizPhone', mState.phone);
+    set('bizAddress', mState.address);
+
+    // Other
+    set('currentCarrier', mState.currentCarrier);
+
+    if (!mState.asap) {
+        set('activationDate', mState.activationDate);
+    }
+
+    selectAcct(mState.acctType || 'personal');
+    selectPort(mState.portNumber || 'yes');
+    selectSim(mState.simType || 'physical');
+
+    if (mState.asap) {
+        mState.asap = false;
+        toggleAsap();
+    }
 }
 
 // ══════════════════════════════════
@@ -216,55 +243,113 @@ function selectAcct(type) {
 // STEP 1 — DETAILS VALIDATION
 // ══════════════════════════════════
 function validateStep1() {
-  let valid = true;
-  if (mState.acctType === 'personal') {
-    [
-      { id:'firstName', v: x => x.trim().length > 0 },
-      { id:'lastName',  v: x => x.trim().length > 0 },
-      { id:'email',     v: x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
-      { id:'dob',       v: x => x && (Date.now()-new Date(x))/(365.25*24*3600*1000) >= 18 },
-      { id:'phone1',    v: x => x.trim().length > 0 },
-      { id:'address',   v: x => x.trim().length > 5 }
-    ].forEach(c => {
-      const inp = document.getElementById(c.id);
-      const err = document.getElementById(c.id + '-err');
-      const ok  = c.v(inp.value);
-      inp.classList.toggle('err', !ok);
-      if (err) err.classList.toggle('show', !ok);
-      if (!ok) valid = false;
-    });
-    if (valid) {
-      mState.firstName = document.getElementById('firstName').value.trim();
-      mState.lastName  = document.getElementById('lastName').value.trim();
-      mState.email     = document.getElementById('email').value.trim();
-      mState.dob       = document.getElementById('dob').value;
-      mState.phone1    = document.getElementById('phone1').value.trim();
-      mState.address   = document.getElementById('address').value.trim();
+
+    let valid = true;
+
+    if (mState.acctType === 'personal') {
+
+        const checks = [
+            { id:'firstName', v:x=>x.trim().length>0 },
+            { id:'lastName',  v:x=>x.trim().length>0 },
+            { id:'email',     v:x=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
+            { id:'dob',       v:x=>x && (Date.now()-new Date(x))/(365.25*24*3600*1000)>=18 },
+            { id:'phone1',    v:x=>x.trim().length>0 },
+            { id:'address',   v:x=>x.trim().length>5 }
+        ];
+
+        checks.forEach(c=>{
+
+            const inp=document.getElementById(c.id);
+            const err=document.getElementById(c.id+'-err');
+
+            const ok=c.v(inp.value);
+
+            inp.classList.toggle('err',!ok);
+
+            if(err) err.classList.toggle('show',!ok);
+
+            if(!ok) valid=false;
+
+        });
+
+        if(valid){
+
+            mState.firstName=document.getElementById('firstName').value.trim();
+            mState.lastName=document.getElementById('lastName').value.trim();
+
+            mState.email=document.getElementById('email').value.trim();
+            mState.phone=document.getElementById('phone1').value.trim();
+
+            mState.dob=document.getElementById('dob').value;
+            mState.address=document.getElementById('address').value.trim();
+
+            // Clear business data
+            mState.companyName='';
+            mState.tradingName='';
+            mState.abn='';
+            mState.dobBiz='';
+
+        }
+
+    } else {
+
+        const checks = [
+            { id:'companyName', v:x=>x.trim().length>0 },
+            { id:'abn',         v:x=>x.trim().length>0 },
+            { id:'bizEmail',    v:x=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
+            { id:'bizPhone',    v:x=>x.trim().length>0 },
+            { id:'dobBiz',      v:x=>x && (Date.now()-new Date(x))/(365.25*24*3600*1000)>=18 },
+            { id:'bizAddress',  v:x=>x.trim().length>5 }
+        ];
+
+        checks.forEach(c=>{
+
+            const inp=document.getElementById(c.id);
+            const err=document.getElementById(c.id+'-err');
+
+            const ok=c.v(inp.value);
+
+            inp.classList.toggle('err',!ok);
+
+            if(err) err.classList.toggle('show',!ok);
+
+            if(!ok) valid=false;
+
+        });
+
+        if(valid){
+
+            // Company details
+            mState.companyName=document.getElementById('companyName').value.trim();
+            mState.tradingName=document.getElementById('tradingName').value.trim();
+            mState.abn=document.getElementById('abn').value.trim();
+
+            // Personal fields remain blank
+            mState.firstName='';
+            mState.lastName='';
+
+            // Shared fields
+            mState.email=document.getElementById('bizEmail').value.trim();
+            mState.phone=document.getElementById('bizPhone').value.trim();
+
+            mState.dobBiz=document.getElementById('dobBiz').value;
+            mState.address=document.getElementById('bizAddress').value.trim();
+
+            // Clear personal DOB
+            mState.dob='';
+
+        }
+
     }
-  } else {
-    [
-      { id:'companyName', v: x => x.trim().length > 0 },
-      { id:'abn',         v: x => x.trim().length > 0 },
-      { id:'bizEmail',    v: x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
-      { id:'bizPhone',    v: x => x.trim().length > 0 },
-      { id:'bizAddress',  v: x => x.trim().length > 5 }
-    ].forEach(c => {
-      const inp = document.getElementById(c.id);
-      const err = document.getElementById(c.id + '-err');
-      const ok  = c.v(inp.value);
-      inp.classList.toggle('err', !ok);
-      if (err) err.classList.toggle('show', !ok);
-      if (!ok) valid = false;
-    });
-    if (valid) {
-      mState.firstName   = document.getElementById('companyName').value.trim();
-      mState.companyName = mState.firstName;
-      mState.email       = document.getElementById('bizEmail').value.trim();
-      mState.phone1      = document.getElementById('bizPhone').value.trim();
-      mState.bizAddress  = document.getElementById('bizAddress').value.trim();
+
+    if(valid){
+
+        saveState();
+
+        goTo(2);
+
     }
-  }
-  if (valid) { saveState(); goTo(2); }
+
 }
 
 // ══════════════════════════════════
