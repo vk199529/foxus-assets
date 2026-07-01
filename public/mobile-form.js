@@ -311,6 +311,7 @@ async function sendOtp() {
       document.getElementById('otp-sent-to').textContent = 'Code sent to ' + phone;
       document.getElementById('otp-box').style.display  = 'block';
       document.getElementById('otp-nav').style.display  = 'block';
+      document.getElementById('verify-back').style.display  = 'block';
       if (btn) { btn.disabled = false; btn.innerHTML = 'Resend code'; }
       document.getElementById('otp0').focus();
       mState.phone = phone;
