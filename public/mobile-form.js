@@ -94,22 +94,36 @@ function init() {
     // Stripe Success
     // ==========================
     if (
-        success === "1" ||
-        localStorage.getItem("foxus_mobile_done") === "1"
-    ) {
+    success === "1" ||
+    localStorage.getItem("foxus_mobile_done") === "1"
+      ) {
 
-        showSuccess();
+            // remove success flag immediately
+            localStorage.removeItem("foxus_mobile_done");
 
-       updateProg(6);
+            // DON'T save state anymore
+            mState = getDefaultMobileState();
 
-        window.history.replaceState(
-            {},
-            document.title,
-            "/signup-mobile"
-        );
+            document
+                .querySelectorAll(".step")
+                .forEach(s => s.classList.remove("active"));
 
-        return;
-    }
+            document
+                .getElementById("step6")
+                .classList.add("active");
+
+            updateProg(6);
+
+            showSuccess();
+
+            window.history.replaceState(
+                {},
+                document.title,
+                "/signup-mobile"
+            );
+
+            return;
+        }
 
     // ==========================
     // Invalid Plan
@@ -230,18 +244,20 @@ function goTo(n) {
         stopKycPolling();
     }
 
-    if (n === 5)
+    if (n === 5) {
         updateOrderSummary();
+    }
 
-    document.querySelectorAll('.step')
-        .forEach(s => s.classList.remove('active'));
+    document.querySelectorAll(".step")
+        .forEach(s => s.classList.remove("active"));
 
-    document.getElementById('step' + n)
-        .classList.add('active');
+    document
+        .getElementById("step" + n)
+        .classList.add("active");
 
     mState.currentStep = n;
 
-    // Don't save success page
+    // SUCCESS SCREEN NEVER SAVES
     if (n !== 6) {
         saveState();
     }
@@ -250,16 +266,17 @@ function goTo(n) {
 
     setTimeout(() => {
 
-        const el = document.getElementById('foxus-mobile');
+        const el = document.getElementById("foxus-mobile");
 
         if (el) {
             el.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+                behavior: "smooth",
+                block: "start"
             });
         }
 
     }, 50);
+
 }
 
 
@@ -1025,12 +1042,13 @@ function showSuccess() {
         el.textContent = `You're all set, ${name}!`;
     }
 
+    // Remove everything immediately
+    localStorage.removeItem("foxus_mobile_state");
+    localStorage.removeItem("foxus_mobile_done");
+
+    mState = getDefaultMobileState();
+
     setTimeout(() => {
-
-        localStorage.removeItem("foxus_mobile_state");
-        localStorage.removeItem("foxus_mobile_done");
-
-        mState = getDefaultMobileState();
 
         window.location.replace("/mobile-plan");
 
