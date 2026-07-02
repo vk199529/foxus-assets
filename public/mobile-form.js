@@ -85,81 +85,83 @@ function loadState() {
 // ══════════════════════════════════
 function init() {
 
-  const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
 
-  const planParam = params.get('plan');
-  const success = params.get('success');
+    const planParam = params.get("plan");
+    const success = params.get("success");
 
-  // Stripe Success
-  if (
-      success === '1' ||
-      localStorage.getItem('foxus_mobile_done') === '1'
-  ) {
+    // ==========================
+    // Stripe Success
+    // ==========================
+    if (
+        success === "1" ||
+        localStorage.getItem("foxus_mobile_done") === "1"
+    ) {
 
-      localStorage.removeItem('foxus_mobile_done');
+        showSuccess();
 
-      showSuccess();
+        goTo(6);
 
-      goTo(6);
+        window.history.replaceState(
+            {},
+            document.title,
+            "/signup-mobile"
+        );
 
-      setTimeout(() => {
-          localStorage.removeItem('foxus_mobile_state');
-          mState = getDefaultMobileState();
+        return;
+    }
 
-          window.location.href = "/mobile-plan";
-      }, 4000);
+    // ==========================
+    // Invalid Plan
+    // ==========================
+    if (!planParam || !MOBILE_PLANS[planParam]) {
 
-      window.history.replaceState(
-          {},
-          document.title,
-          "/signup-mobile"
-      );
+        localStorage.removeItem("foxus_mobile_state");
+        localStorage.removeItem("foxus_mobile_done");
 
-      return;
-  }
+        window.location.replace("/mobile-plan");
 
-  // Invalid plan
-  if (!planParam || !MOBILE_PLANS[planParam]) {
+        return;
+    }
 
-      localStorage.removeItem("foxus_mobile_state");
+    // ==========================
+    // Restore Previous Session
+    // ==========================
+    const restored = loadState();
 
-      window.location.href = "/mobile-plan";
+    // Restore selected plan if missing
+    if (!mState.selectedPlan) {
+        mState.selectedPlan = MOBILE_PLANS[planParam];
+    }
 
-      return;
-  }
+    if (
+        restored &&
+        mState.currentStep < 6
+    ) {
 
-  // Restore existing session
-  const restored = loadState();
-  if (!mState.selectedPlan && MOBILE_PLANS[planParam]) {
+        restoreFormValues();
+
+        updateOrderSummary();
+
+        goTo(mState.currentStep || 0);
+
+        return;
+    }
+
+    // ==========================
+    // Fresh Signup
+    // ==========================
+    mState = getDefaultMobileState();
+
     mState.selectedPlan = MOBILE_PLANS[planParam];
-}
 
-saveState();
+    mState.currentStep = 0;
 
-  if (
-      restored &&
-      mState.currentStep < 6
-  ) {
+    saveState();
 
-      restoreFormValues();
+    updateOrderSummary();
 
-      updateOrderSummary();
-
-      goTo(mState.currentStep || 0);
-
-      return;
-  }
-
-  // Fresh signup
-  mState.selectedPlan = MOBILE_PLANS[planParam];
-
-  mState.currentStep = 0;
-
-  saveState();
-
-  updateOrderSummary();
-
-  goTo(0);
+    goTo(0);
 
 }
 
@@ -192,7 +194,7 @@ function restoreFormValues() {
         set('activationDate', mState.activationDate);
     }
 
-    selectAcct(mState.acctType || 'personal');
+    selectAcct(mState.acctType || 'personal', false);
     selectPort(mState.portNumber || 'yes');
     selectSim(mState.simType || 'physical');
 
@@ -269,7 +271,7 @@ function updateProg(n) {
 // ══════════════════════════════════
 // STEP 0 — ACCOUNT TYPE
 // ══════════════════════════════════
-function selectAcct(type) {
+function selectAcct(type, save = true) {
   mState.acctType = type;
   document.getElementById('acct-personal').classList.toggle('selected', type === 'personal');
   document.getElementById('acct-business').classList.toggle('selected', type === 'business');
@@ -277,7 +279,7 @@ function selectAcct(type) {
   document.querySelector('#acct-business .acct-icon').style.background = type === 'business' ? 'var(--blue)' : '#E5E5E5';
   document.getElementById('fields-personal').style.display = type === 'personal' ? '' : 'none';
   document.getElementById('fields-business').style.display = type === 'business' ? '' : 'none';
-  saveState();
+   if (save) saveState();
 }
 
 // ══════════════════════════════════
@@ -1007,23 +1009,22 @@ async function processPayment() {
 // ══════════════════════════════════
 function showSuccess() {
 
-    const name = mState.firstName || mState.companyName || 'there';
+    const name = mState.firstName || mState.companyName || "there";
 
-    const el = document.getElementById('success-title');
+    const el = document.getElementById("success-title");
 
     if (el) {
-        el.textContent = "You're all set, " + name + "!";
+        el.textContent = `You're all set, ${name}!`;
     }
 
-    // Show success screen for 4 seconds
     setTimeout(() => {
 
-        localStorage.removeItem('foxus_mobile_state');
-        localStorage.removeItem('foxus_mobile_done');
+        localStorage.removeItem("foxus_mobile_state");
+        localStorage.removeItem("foxus_mobile_done");
 
         mState = getDefaultMobileState();
 
-        window.location.href = "/mobile-plan";
+        window.location.replace("/mobile-plan");
 
     }, 4000);
 
