@@ -59,6 +59,7 @@ let kycVerId      = null;
 // SAVE / LOAD
 // ══════════════════════════════════
 function saveState() {
+      console.trace("SAVE STATE CALLED");
   localStorage.setItem('foxus_mobile_state', JSON.stringify(mState));
 }
 
