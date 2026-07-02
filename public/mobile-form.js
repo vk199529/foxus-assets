@@ -100,7 +100,7 @@ function init() {
 
         showSuccess();
 
-        goTo(6);
+       updateProg(6);
 
         window.history.replaceState(
             {},
@@ -992,10 +992,15 @@ async function processPayment() {
     console.log('Stripe response:', data);
 
     if (data.url) {
-      localStorage.setItem('foxus_mobile_done', '1');
-      saveState();
-      window.location.href = data.url;
-    } else {
+
+    saveState();
+
+    localStorage.setItem("foxus_mobile_done", "1");
+
+    window.location.href = data.url;
+
+    return;
+} else {
       throw new Error('No checkout URL');
     }
   } catch(e) {
