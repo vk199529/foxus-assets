@@ -481,7 +481,7 @@ async function sendOtp() {
         return;
     }
 
-    // Save phone
+   
     mState.phone = phone;
     saveState();
 
@@ -871,14 +871,28 @@ function stopKycPolling(){
 // ORDER SUMMARY
 // ══════════════════════════════════
 function updateOrderSummary() {
-  if (!mState.selectedPlan) return;
-  const p = mState.selectedPlan;
-  document.getElementById('ord-plan').textContent   = p.tag;
-  document.getElementById('ord-detail').textContent = p.data + ' on 5G';
-  document.getElementById('ord-price').textContent  = '$' + p.price + '.00';
-  document.getElementById('ord-gst').textContent    = '$' + (p.price / 11).toFixed(2);
-  document.getElementById('ord-total').textContent  = '$' + p.price + '.00';
-  document.getElementById('pay-txt').textContent    = 'Pay $' + p.price + ' & activate';
+
+    if (!mState.selectedPlan) return;
+
+    const p = mState.selectedPlan;
+
+    document.getElementById('ord-plan').textContent = p.tag;
+
+    document.getElementById('ord-detail').textContent =
+        `${p.data} on 5G`;
+
+    document.getElementById('ord-price').textContent =
+        `$${p.price}.00`;
+
+    document.getElementById('ord-gst').textContent =
+        `$${(p.price / 11).toFixed(2)}`;
+
+    document.getElementById('ord-total').textContent =
+        `$${p.price}.00`;
+
+    document.getElementById('pay-txt').textContent =
+        `Pay $${p.price} & activate`;
+
 }
 
 // ══════════════════════════════════
@@ -891,30 +905,76 @@ async function processPayment() {
 
   try {
     const p = mState.selectedPlan;
-    const payload = {
-      flow:      'mobile',
 
-      email:     mState.email,
-      phone:     mState.phone || mState.phone1 || '',
-      phone1:    mState.phone1 || '',
-      acctType:  mState.acctType,
+     const payload = {
 
-      firstName: mState.firstName || '',
-      lastName:  mState.lastName  || '',
+    flow: "mobile",
 
-
-      planName:      p.tag,
-      price:     p.price,
-      stripeAmount: p.price * 100,
-      simType:   mState.simType,
-      portNumber: mState.portNumber,
-      currentCarrier: mState.currentCarrier || '',
-      activationDate: mState.asap ? null : mState.activationDate,
-      asap:      mState.asap,
     
-      address:   mState.address   || '',
-      source:    'webflow-mobile-signup'
-    };
+    acctType: mState.acctType,
+
+    email: mState.email,
+
+    phone: mState.phone || "",
+
+    firstName: mState.firstName || "",
+
+    lastName: mState.lastName || "",
+
+    companyName: mState.companyName || "",
+
+    tradingName: mState.tradingName || "",
+
+    abn: mState.abn || "",
+
+    dob:
+        mState.acctType === "business"
+        ? mState.dobBiz
+        : mState.dob,
+
+    
+    address:
+        mState.acctType === "business"
+        ? mState.bizAddress
+        : mState.address,
+
+    
+    planName: p.tag,
+
+    planData: p.data,
+
+    planPrice: Number(p.price),
+
+    totalPrice: Number(p.price),
+
+    stripeAmount: Number(p.price) * 100,
+
+    
+    simType: mState.simType,
+
+    
+    portNumber: mState.portNumber,
+
+    currentCarrier: mState.currentCarrier || "",
+
+  
+    activationDate:
+        mState.asap
+        ? null
+        : mState.activationDate,
+
+    asap: mState.asap,
+    kycType:
+    mState.kycType === "licence"
+        ? "Driver Licence"
+        : mState.kycType === "passport"
+        ? "Passport"
+        : "Medicare Card",
+
+    
+    source: "webflow-mobile-signup"
+
+};
 
     console.log('Payment payload:', payload);
 
