@@ -171,7 +171,6 @@ function restoreFormValues() {
     set('lastName', mState.lastName);
     set('email', mState.email);
     set('dob', mState.dob);
-    set('phone1', mState.phone);
     set('address', mState.address);
 
     // Business
@@ -180,7 +179,6 @@ function restoreFormValues() {
     set('abn', mState.abn);
     set('dobBiz', mState.dobBiz);
     set('bizEmail', mState.email);
-    set('bizPhone', mState.phone);
     set('bizAddress', mState.address);
 
     // Other
@@ -252,7 +250,6 @@ function validateStep1() {
             { id:'lastName',  v:x=>x.trim().length>0 },
             { id:'email',     v:x=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
             { id:'dob',       v:x=>x && (Date.now()-new Date(x))/(365.25*24*3600*1000)>=18 },
-            { id:'phone1',    v:x=>x.trim().length>0 },
             { id:'address',   v:x=>x.trim().length>5 }
         ];
 
@@ -276,8 +273,7 @@ function validateStep1() {
             mState.firstName=document.getElementById('firstName').value.trim();
             mState.lastName=document.getElementById('lastName').value.trim();
 
-            mState.email=document.getElementById('email').value.trim();
-            mState.phone=document.getElementById('phone1').value.trim();
+            mState.email=document.getElementById('email').value.trim();  
 
             mState.dob=document.getElementById('dob').value;
             mState.address=document.getElementById('address').value.trim();
@@ -296,7 +292,6 @@ function validateStep1() {
             { id:'companyName', v:x=>x.trim().length>0 },
             { id:'abn',         v:x=>x.trim().length>0 },
             { id:'bizEmail',    v:x=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
-            { id:'bizPhone',    v:x=>x.trim().length>0 },
             { id:'dobBiz',      v:x=>x && (Date.now()-new Date(x))/(365.25*24*3600*1000)>=18 },
             { id:'bizAddress',  v:x=>x.trim().length>5 }
         ];
@@ -329,7 +324,6 @@ function validateStep1() {
 
             // Shared fields
             mState.email=document.getElementById('bizEmail').value.trim();
-            mState.phone=document.getElementById('bizPhone').value.trim();
 
             mState.dobBiz=document.getElementById('dobBiz').value;
             mState.address=document.getElementById('bizAddress').value.trim();
@@ -408,84 +402,236 @@ function validateStep2() {
 // STEP 3 — OTP via Twilio/Make.com
 // ══════════════════════════════════
 async function sendOtp() {
-  const phone = document.getElementById('phoneNumber').value.trim();
-  const errEl = document.getElementById('phone-err');
-  const inp   = document.getElementById('phoneNumber');
 
-  // Validate — must not be empty
-  if (!phone) {
-    inp.classList.add('err');
-    errEl.textContent = 'Please enter your mobile number.';
-    errEl.classList.add('show');
-    return;
-  }
+    const phone = document.getElementById('phoneNumber').value.trim();
+    const errEl = document.getElementById('phone-err');
+    const inp   = document.getElementById('phoneNumber');
 
-  // Validate format — accept +61, +91, 04xx or any international +XX format
-  const cleaned = phone.replace(/\s/g, '');
-  const isAU    = /^(\+61|0)[4-5]\d{8}$/.test(cleaned);
-  const isIN    = /^\+91[6-9]\d{9}$/.test(cleaned);
-  const isIntl  = /^\+\d{7,15}$/.test(cleaned);
+    // Clear previous errors
+    inp.classList.remove('err');
+    errEl.classList.remove('show');
 
-  if (!isAU && !isIN && !isIntl) {
-    inp.classList.add('err');
-    errEl.textContent = 'Please enter a valid number. e.g. +61 412 345 678 or +91 98765 43210';
-    errEl.classList.add('show');
-    return;
-  }
-
-  inp.classList.remove('err');
-  errEl.classList.remove('show');
-
-  // Disable button while sending
-  const btn = document.getElementById('send-otp-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="opacity:.7">Sending...</span>'; }
-
-  try {
-    const res  = await fetch("https://hook.eu1.make.com/3rgtnkjfl6urr2tgg5r69xly6w3orx3t", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone })
-    });
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById('otp-sent-to').textContent = 'Code sent to ' + phone;
-      document.getElementById('otp-box').style.display  = 'block';
-      document.getElementById('otp-nav').style.display  = 'block';
-      document.getElementById('verify-back').style.display  = 'none';
-      if (btn) { btn.disabled = false; btn.innerHTML = 'Resend code'; }
-      document.getElementById('otp0').focus();
-      mState.phone = phone;
-      saveState();
-    } else {
-      if (btn) { btn.disabled = false; btn.innerHTML = 'Next <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'; }
-      errEl.textContent = 'Could not send code. Please check your number and try again.';
-      errEl.classList.add('show');
+    // Validate
+    if (!phone) {
+        inp.classList.add('err');
+        errEl.textContent = 'Please enter your mobile number.';
+        errEl.classList.add('show');
+        return;
     }
-  } catch(e) {
-    console.error(e);
-    if (btn) { btn.disabled = false; btn.innerHTML = 'Next <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'; }
-    errEl.textContent = 'Could not send code. Please try again.';
-    errEl.classList.add('show');
-  }
+
+    const cleaned = phone.replace(/\s/g, '');
+
+    const isAU   = /^(\+61|0)[4-5]\d{8}$/.test(cleaned);
+    const isIN   = /^\+91[6-9]\d{9}$/.test(cleaned);
+    const isIntl = /^\+\d{7,15}$/.test(cleaned);
+
+    if (!isAU && !isIN && !isIntl) {
+
+        inp.classList.add('err');
+
+        errEl.textContent =
+            'Please enter a valid number. e.g. +61 412 345 678 or +91 98765 43210';
+
+        errEl.classList.add('show');
+
+        return;
+    }
+
+    // Save phone
+    mState.phone = phone;
+    saveState();
+
+    const btn = document.getElementById('send-otp-btn');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span style="opacity:.7">Sending...</span>';
+
+    try {
+
+        const res = await fetch(
+            "https://hook.eu1.make.com/3rgtnkjfl6urr2tgg5r69xly6w3orx3t",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    phone: phone
+                })
+            }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+
+            document.getElementById('otp-sent-to').textContent =
+                'Code sent to ' + phone;
+
+            document.getElementById('otp-box').style.display = 'block';
+            document.getElementById('otp-nav').style.display = 'block';
+            document.getElementById('verify-back').style.display = 'none';
+
+            // Clear old OTP
+            for (let i = 0; i < 6; i++) {
+                document.getElementById('otp' + i).value = '';
+            }
+
+            document.getElementById('otp0').focus();
+
+            btn.disabled = false;
+            btn.innerHTML = 'Resend code';
+
+        } else {
+
+            btn.disabled = false;
+
+            btn.innerHTML = `
+                Next
+                <svg width="14" height="14" fill="none" stroke="currentColor"
+                stroke-width="2.5" viewBox="0 0 24 24">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            `;
+
+            errEl.textContent =
+                'Could not send code. Please check your number and try again.';
+
+            errEl.classList.add('show');
+        }
+
+    } catch (e) {
+
+        console.error(e);
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            Next
+            <svg width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
+
+        errEl.textContent =
+            'Could not send code. Please try again.';
+
+        errEl.classList.add('show');
+    }
+
 }
 
-function otpIn(i) { const v = document.getElementById('otp'+i).value; if(v && i<5) document.getElementById('otp'+(i+1)).focus(); }
-function otpKey(e,i) { if(e.key==='Backspace' && !document.getElementById('otp'+i).value && i>0) document.getElementById('otp'+(i-1)).focus(); }
+// OTP Navigation
+function otpIn(i) {
 
+    const v = document.getElementById('otp' + i).value;
+
+    if (v && i < 5) {
+        document.getElementById('otp' + (i + 1)).focus();
+    }
+
+}
+
+function otpKey(e, i) {
+
+    if (
+        e.key === 'Backspace' &&
+        !document.getElementById('otp' + i).value &&
+        i > 0
+    ) {
+        document.getElementById('otp' + (i - 1)).focus();
+    }
+
+}
+
+// Verify OTP
 async function verifyOtp() {
-  const code  = [0,1,2,3,4,5].map(i => document.getElementById('otp'+i).value).join('');
-  const errEl = document.getElementById('s3-err');
-  if (code.length < 6) { errEl.textContent='Enter the 6-digit code.'; errEl.classList.add('show'); return; }
-  try {
-    const res  = await fetch("https://hook.eu1.make.com/m4j7618543m7ljsj1k8ymvxdvjsr9wzn", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: mState.phone, code })
-    });
-    const data = await res.json();
-    if (data.success) { errEl.classList.remove('show'); goTo(4); }
-    else { errEl.textContent='Incorrect code. Try again.'; errEl.classList.add('show'); }
-  } catch(e) { errEl.textContent='Verification failed. Try again.'; errEl.classList.add('show'); }
+
+    const code = [0,1,2,3,4,5]
+        .map(i => document.getElementById('otp' + i).value)
+        .join('');
+
+    const errEl = document.getElementById('s3-err');
+
+    errEl.classList.remove('show');
+
+    if (code.length < 6) {
+
+        errEl.textContent = 'Enter the 6-digit code.';
+        errEl.classList.add('show');
+
+        return;
+    }
+
+    const btn = document.querySelector('#otp-nav .btn-next');
+
+    btn.disabled = true;
+    btn.innerHTML = 'Verifying...';
+
+    try {
+
+        const res = await fetch(
+            "https://hook.eu1.make.com/m4j7618543m7ljsj1k8ymvxdvjsr9wzn",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    phone: mState.phone,
+                    code: code
+                })
+            }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+
+            errEl.classList.remove('show');
+
+            goTo(4);
+
+            return;
+        }
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            Verify &amp; continue
+            <svg width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
+
+        errEl.textContent = 'Incorrect code. Try again.';
+        errEl.classList.add('show');
+
+    } catch (e) {
+
+        console.error(e);
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            Verify &amp; continue
+            <svg width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
+
+        errEl.textContent = 'Verification failed. Please try again.';
+        errEl.classList.add('show');
+
+    }
+
 }
 
 // ══════════════════════════════════
