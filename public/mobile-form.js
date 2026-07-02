@@ -41,7 +41,11 @@ function getDefaultMobileState() {
     dobBiz: '',
     bizAddress: '',
 
-    currentStep: 0
+    currentStep: 0,
+
+    kycType: 'licence',
+    kycVerId: '',
+    kycVerified: false,
   };
 }
 
@@ -196,22 +200,62 @@ function restoreFormValues() {
         mState.asap = false;
         toggleAsap();
     }
+
+    if (
+    mState.currentStep === 4 &&
+    mState.kycVerId &&
+    !mState.kycVerified
+      ) {
+
+          kycVerId = mState.kycVerId;
+
+          document.getElementById("kyc-options").style.display = "none";
+          document.getElementById("kyc-btn-group").style.display = "none";
+          document.getElementById("kyc-waiting").classList.add("show");
+
+          window.addEventListener("focus", onKycFocus);
+
+          kycPollTimer = setInterval(checkKycStatus, 3000);
+      }
 }
 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
 function goTo(n) {
-  if (n === 5) updateOrderSummary();
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step' + n).classList.add('active');
-  mState.currentStep = n;
-  saveState();
-  updateProg(n);
-  setTimeout(() => {
-    const el = document.getElementById('foxus-mobile');
-    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 50);
+
+    if (mState.currentStep === 4 && n !== 4) {
+        stopKycPolling();
+    }
+
+    if (n === 5)
+        updateOrderSummary();
+
+    document.querySelectorAll('.step')
+        .forEach(s => s.classList.remove('active'));
+
+    document
+        .getElementById('step' + n)
+        .classList.add('active');
+
+    mState.currentStep = n;
+
+    saveState();
+
+    updateProg(n);
+
+    setTimeout(() => {
+
+        const el = document.getElementById('foxus-mobile');
+
+        if (el)
+            el.scrollIntoView({
+                behavior:'smooth',
+                block:'start'
+            });
+
+    },50);
+
 }
 
 function updateProg(n) {
@@ -637,69 +681,190 @@ async function verifyOtp() {
 // ══════════════════════════════════
 // STEP 4 — KYC (Stripe Identity)
 // ══════════════════════════════════
+
 function selectKyc(type) {
-  document.querySelectorAll('.kyc-option').forEach(el => el.classList.remove('selected'));
-  document.getElementById('kyc-' + type).classList.add('selected');
+
+    mState.kycType = type;
+
+    document.querySelectorAll('.kyc-option')
+        .forEach(el => el.classList.remove('selected'));
+
+    document
+        .getElementById('kyc-' + type)
+        .classList.add('selected');
+
+    saveState();
 }
 
 async function startKyc() {
-  const btn = document.querySelector('#kyc-btn-group .btn-next');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="opacity:.7">Starting...</span>'; }
 
-  try {
-    const res  = await fetch("https://hook.eu1.make.com/4llc5cxsvs73lrnu533elyj8ogohkm3y", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ return_url: 'https://verify.stripe.com/success' })
-    });
-    const data = await res.json();
+    const btn = document.querySelector('#kyc-btn-group .btn-next');
 
-    kycVerId = data.id;
-    console.log('KYC session:', kycVerId);
+    btn.disabled = true;
+    btn.innerHTML = '<span style="opacity:.7">Starting...</span>';
 
-    if (data.url) {
-      saveState();
-      window.open(data.url, '_blank');
+    try {
 
-      if (btn) {
+        const response = await fetch(
+            "https://hook.eu1.make.com/4llc5cxsvs73lrnu533elyj8ogohkm3y",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({
+
+                    verification_type: mState.kycType || "licence",
+
+                    return_url:
+                    "https://verify.stripe.com/success"
+
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        console.log(data);
+
+        if (!data.url || !data.id)
+            throw new Error("Invalid KYC response");
+
+        // Save verification session
+        kycVerId = data.id;
+
+        mState.kycVerId = data.id;
+
+        saveState();
+
+        // Open Stripe
+        const popup = window.open(data.url,"_blank");
+
+        if (!popup) {
+
+            throw new Error("Popup blocked");
+
+        }
+
+        // Show waiting screen
+
+        document.getElementById("kyc-options").style.display = "none";
+
+        document.getElementById("kyc-btn-group").style.display = "none";
+
+        document.getElementById("kyc-waiting").classList.add("show");
+
         btn.disabled = false;
-        btn.innerHTML = 'Next <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
-      }
 
-      // Show waiting UI
-      document.getElementById('kyc-options').style.display = 'none';
-      document.getElementById('kyc-btn-group').style.display = 'none';
-      document.getElementById('kyc-waiting').classList.add('show');
+        btn.innerHTML = `
+            Next
+            <svg width="14" height="14" fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
 
-      // Poll
-      window.addEventListener('focus', onKycFocus);
-      kycPollTimer = setInterval(checkKycStatus, 3000);
+        window.addEventListener("focus", onKycFocus);
+
+        kycPollTimer = setInterval(checkKycStatus,3000);
+
     }
-  } catch(e) {
-    console.error(e);
-    if (btn) { btn.disabled = false; btn.innerHTML = 'Next <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'; }
-    document.getElementById('s4-err').textContent = 'Unable to start verification. Please try again.';
-    document.getElementById('s4-err').classList.add('show');
-  }
+    catch(err){
+
+        console.error(err);
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            Next
+            <svg width="14" height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
+
+        document.getElementById("s4-err").textContent =
+        err.message === "Popup blocked"
+        ? "Popup blocked. Please allow popups and try again."
+        : "Unable to start verification. Please try again.";
+
+        document.getElementById("s4-err")
+            .classList.add("show");
+
+    }
+
 }
 
-function onKycFocus() { setTimeout(checkKycStatus, 800); }
+function onKycFocus(){
 
-async function checkKycStatus() {
-  try {
-    const res  = await fetch("https://hook.eu1.make.com/ulmemio3o92nmljzm1t52rohg4dymoek", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ verification_id: kycVerId })
-    });
-    const text = await res.text();
-    console.log('KYC status:', text);
-    if (text === 'true') {
-      window.removeEventListener('focus', onKycFocus);
-      if (kycPollTimer) { clearInterval(kycPollTimer); kycPollTimer = null; }
-      goTo(5);
+    setTimeout(checkKycStatus,1000);
+
+}
+
+async function checkKycStatus(){
+
+    if(!mState.kycVerId)
+        return;
+
+    try{
+
+        const response = await fetch(
+            "https://hook.eu1.make.com/ulmemio3o92nmljzm1t52rohg4dymoek",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    verification_id:mState.kycVerId
+                })
+            }
+        );
+
+        const text = await response.text();
+
+        console.log("KYC Status:",text);
+
+        if(text.trim().toLowerCase()==="true"){
+
+            stopKycPolling();
+
+            mState.kycVerified = true;
+
+            saveState();
+
+            goTo(5);
+
+        }
+
     }
-  } catch(e) { console.error('KYC poll error:', e); }
+    catch(e){
+
+        console.error(e);
+
+    }
+
+}
+
+function stopKycPolling(){
+
+    if(kycPollTimer){
+
+        clearInterval(kycPollTimer);
+
+        kycPollTimer=null;
+
+    }
+
+    window.removeEventListener("focus",onKycFocus);
+
 }
 
 // ══════════════════════════════════
