@@ -1006,13 +1006,28 @@ async function processPayment() {
 // SUCCESS
 // ══════════════════════════════════
 function showSuccess() {
-  const name = mState.firstName || 'there';
-  const el   = document.getElementById('success-title');
-  if (el) el.textContent = 'You\'re all set, ' + name + '!';
-  localStorage.removeItem('foxus_mobile_state');
-  localStorage.removeItem('foxus_mobile_done');
-}
 
+    const name = mState.firstName || mState.companyName || 'there';
+
+    const el = document.getElementById('success-title');
+
+    if (el) {
+        el.textContent = "You're all set, " + name + "!";
+    }
+
+    // Show success screen for 4 seconds
+    setTimeout(() => {
+
+        localStorage.removeItem('foxus_mobile_state');
+        localStorage.removeItem('foxus_mobile_done');
+
+        mState = getDefaultMobileState();
+
+        window.location.href = "/mobile-plan";
+
+    }, 4000);
+
+}
 // ══════════════════════════════════
 // RUN
 // ══════════════════════════════════
