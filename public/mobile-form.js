@@ -236,13 +236,15 @@ function goTo(n) {
     document.querySelectorAll('.step')
         .forEach(s => s.classList.remove('active'));
 
-    document
-        .getElementById('step' + n)
+    document.getElementById('step' + n)
         .classList.add('active');
 
     mState.currentStep = n;
 
-    saveState();
+    // Don't save success page
+    if (n !== 6) {
+        saveState();
+    }
 
     updateProg(n);
 
@@ -250,15 +252,16 @@ function goTo(n) {
 
         const el = document.getElementById('foxus-mobile');
 
-        if (el)
+        if (el) {
             el.scrollIntoView({
-                behavior:'smooth',
-                block:'start'
+                behavior: 'smooth',
+                block: 'start'
             });
+        }
 
-    },50);
-
+    }, 50);
 }
+
 
 function updateProg(n) {
   for (let i = 0; i <= 5; i++) {
