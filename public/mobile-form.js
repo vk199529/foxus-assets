@@ -953,22 +953,26 @@ function updateOrderSummary() {
 
     const p = mState.selectedPlan;
 
-    document.getElementById('ord-plan').textContent = p.tag;
+    const gst = Number((p.price * 0.10).toFixed(2));
 
-    document.getElementById('ord-detail').textContent =
-        `${p.data} on 5G`;
+    const total = Number((p.price + gst).toFixed(2));
 
-    document.getElementById('ord-price').textContent =
-        `$${p.price}.00`;
+    document.getElementById("ord-plan").textContent = p.tag;
 
-    document.getElementById('ord-gst').textContent =
-        `$${(p.price / 11).toFixed(2)}`;
+    document.getElementById("ord-detail").textContent =
+        `${p.data} on ${p.network}`;
 
-    document.getElementById('ord-total').textContent =
-        `$${p.price}.00`;
+    document.getElementById("ord-price").textContent =
+        `$${p.price.toFixed(2)}`;
 
-    document.getElementById('pay-txt').textContent =
-        `Pay $${p.price} & activate`;
+    document.getElementById("ord-gst").textContent =
+        `$${gst.toFixed(2)}`;
+
+    document.getElementById("ord-total").textContent =
+        `$${total.toFixed(2)}`;
+
+    document.getElementById("pay-txt").textContent =
+        `Pay $${total.toFixed(2)} & Activate`;
 
 }
 
@@ -980,8 +984,25 @@ async function processPayment() {
   btn.disabled = true;
   btn.innerHTML = '<span style="opacity:.7">Redirecting to payment...</span>';
 
+  const consent = document.getElementById("paymentConsent");
+
+if (!consent.checked) {
+
+    document.getElementById("consent-err").textContent =
+        "Please accept the payment authorisation.";
+
+    document.getElementById("consent-err").classList.add("show");
+
+    return;
+}
+
+document.getElementById("consent-err").classList.remove("show");
+
   try {
     const p = mState.selectedPlan;
+    const gst = Number((p.price * 0.10).toFixed(2));
+
+     const total = Number((p.price + gst).toFixed(2));
 
      const payload = {
 
@@ -1022,9 +1043,15 @@ async function processPayment() {
 
     planPrice: Number(p.price),
 
-    totalPrice: Number(p.price),
+    gst: gst,
 
-    stripeAmount: Number(p.price) * 100,
+    // totalPrice: Number(p.price),
+
+    totalPrice: total,
+
+    // stripeAmount: Number(p.price) * 100,
+
+    stripeAmount: Math.round(total * 100),
 
     
     simType: mState.simType,
