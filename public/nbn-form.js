@@ -98,6 +98,29 @@ function init() {
   const flowParam    = params.get('flow');
   const planParam    = params.get('plan');
   const successParam = params.get('success');
+  const cancelled    = params.get('cancel');
+
+  // ───────────────────────────────
+// Stripe Cancel Return
+// ───────────────────────────────
+if (cancelled === "1") {
+
+    loadNbnState();
+
+    restoreFormValues();
+
+    updateOrderSummary();
+
+    goTo(4); // Payment step
+
+    window.history.replaceState(
+        {},
+        document.title,
+        `/signup-nbn?flow=${flowParam}&plan=${planParam}`
+    );
+
+    return;
+}
 
   // ───────────────────────────────
   // Stripe Success Return
@@ -111,18 +134,6 @@ function init() {
     goTo(5);
     showSuccessScreen();
 
-const cancelled = params.get("cancel");
-
-if (cancelled === "1") {
-
-    nbnState.currentStep = 0;
-
-    saveNbnState();
-
-    goTo(4);
-
-    return;
-}
 
     // remove success param from URL
     window.history.replaceState(
