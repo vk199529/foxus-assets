@@ -506,15 +506,7 @@ function validateStep3() {
 // ORDER SUMMARY
 // ══════════════════════════════════
 function updateOrderSummary() {
-  console.log({
-    planPrice: p.price,
-    modemPrice,
-    subtotal,
-    gst,
-    modemChoice: nbnState.modemChoice,
-    modemSize: nbnState.modemSize
-});
-
+  
   if (!nbnState.selectedPlan) return;
   const p = nbnState.selectedPlan;
   const modemPrice = nbnState.modemChoice === 'foxus' ? (nbnState.modemSize === 3 ? 399 : 199) : 0;
