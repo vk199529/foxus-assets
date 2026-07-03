@@ -101,9 +101,23 @@ function init() {
   const flowParam    = params.get('flow');
   const planParam    = params.get('plan');
   const successParam = params.get('success');
+  const cancelled = params.get("cancel");
 
 
+if (cancelled === "1") {
 
+    localStorage.removeItem("foxus_nbn_done");
+
+    loadNbnState();
+
+    restoreFormValues();
+
+    updateOrderSummary();
+
+    goTo(4);
+
+    return;
+}
 
   // ───────────────────────────────
   // Stripe Success Return
