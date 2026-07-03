@@ -980,7 +980,7 @@ function updateOrderSummary() {
 // PAYMENT
 // ══════════════════════════════════
 async function processPayment() {
-    
+
     const consent = document.getElementById("paymentConsent");
 
 if (!consent.checked) {
@@ -1145,3 +1145,28 @@ function showSuccess() {
 // ══════════════════════════════════
 init();
 
+// Payment Consent
+const consent = document.getElementById("paymentConsent");
+
+if (consent) {
+
+    consent.addEventListener("change", function () {
+
+        document.getElementById("consent-err").classList.remove("show");
+
+        const btn = document.getElementById("pay-btn");
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            <span id="pay-txt">${document.getElementById("pay-txt").textContent}</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
+
+    });
+
+}
