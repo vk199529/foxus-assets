@@ -509,14 +509,19 @@ function updateOrderSummary() {
   if (!nbnState.selectedPlan) return;
   const p = nbnState.selectedPlan;
   const modemPrice = nbnState.modemChoice === 'foxus' ? (nbnState.modemSize === 3 ? 399 : 199) : 0;
-  const total = p.price + modemPrice;
+  // const total = p.price + modemPrice;
+  const subtotal = p.price + modemPrice;
+
+const gst = subtotal / 11;
+
+const total = subtotal;
 
   document.getElementById('ord-plan').textContent   = p.tag;
   document.getElementById('ord-detail').textContent = p.data + ' download';
   document.getElementById('ord-price').textContent  = '$' + p.price + '.00';
-  document.getElementById('ord-gst').textContent    = '$' + (total / 11).toFixed(2);
-  document.getElementById('ord-total').textContent  = '$' + total + '.00';
-  document.getElementById('pay-txt').textContent    = 'Pay $' + total + ' & activate';
+  document.getElementById('ord-gst').textContent    =  '$' + gst.toFixed(2);
+  document.getElementById('ord-total').textContent  =   '$' + total.toFixed(2);
+  document.getElementById('pay-txt').textContent    =   'Pay $' + total.toFixed(2) + ' & activate';
 
   const modemLine = document.getElementById('ord-modem-line');
   if (nbnState.modemChoice === 'foxus') {
@@ -532,118 +537,148 @@ function updateOrderSummary() {
 // PAYMENT — same Make.com hook as mobile
 // ══════════════════════════════════
 async function processPayment() {
-const btn = document.getElementById('pay-btn');
 
-btn.disabled = true;
-btn.innerHTML =
-'<span style="opacity:.7">Redirecting to payment...</span>';
+    const consent = document.getElementById("paymentConsent");
 
-try {
+    if (!consent.checked) {
 
+        const err = document.getElementById("consent-err");
 
-const p = nbnState.selectedPlan;
+        err.textContent = "Please accept the payment authorisation.";
 
-const modemPrice =
-  nbnState.modemChoice === 'foxus'
-    ? (nbnState.modemSize === 3 ? 399 : 199)
-    : 0;
+        err.classList.add("show");
 
-const total = p.price + modemPrice;
+        return;
 
-const payload = {
-  flow: 'nbn',
+    }
 
-  // customer
-  email: nbnState.email,
-  phone: nbnState.phone || '',
-  acctType: nbnState.acctType,
+    const btn = document.getElementById("pay-btn");
 
-  // Personal Details
-  firstName: nbnState.firstName || '',
-  lastName: nbnState.lastName || '',
+    btn.disabled = true;
 
-  // Business Details
-  companyName: nbnState.companyName || '',
-  tradingName: nbnState.tradingName || '',
-  abn: nbnState.abn || '',
-  dob: nbnState.acctType === 'business'
-    ? nbnState.dobBiz
-    : nbnState.dob,
+    btn.innerHTML =
+        '<span style="opacity:.7">Redirecting to payment...</span>';
 
-  // plan
-  planName: p.tag + ' NBN',
-  planSpeed: p.data,
-  planPrice: Number(p.price),
+    try {
 
-  // modem
-  modemChoice: nbnState.modemChoice,
-  modemSize: nbnState.modemSize,
-  modemPrice: Number(modemPrice),
-  totalPrice: total,
-  stripeAmount: total * 100,
+        const p = nbnState.selectedPlan;
 
-  // service
-  installAddress: nbnState.installAddr,
-  activationDate: nbnState.asap
-    ? null
-    : nbnState.activationDate,
-  asap: nbnState.asap,
-  ntd: nbnState.ntd,
+        const modemPrice =
+            nbnState.modemChoice === 'foxus'
+                ? (nbnState.modemSize === 3 ? 399 : 199)
+                : 0;
 
-  // debugging
-  source: 'webflow-nbn-signup'
-};
+        const subtotal = p.price + modemPrice;
 
-console.log('Sending payload:', payload);
+        const gst = subtotal / 11;
 
-const response = await fetch(
-  'https://hook.eu1.make.com/9cjwqioh6l38gidsf3spbl98aqm8f5pe',
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  }
-);
+        const total = subtotal;
 
-const data = await response.json();
+        const payload = {
 
-console.log('Stripe response:', data);
+            flow: 'nbn',
 
-if (data.url) {
-  localStorage.setItem('foxus_nbn_done', '1');
-  saveNbnState();
+            // Customer
+            email: nbnState.email,
+            phone: nbnState.phone || '',
+            acctType: nbnState.acctType,
 
-  window.location.href = data.url;
-  return;
-}
+            // Personal
+            firstName: nbnState.firstName || '',
+            lastName: nbnState.lastName || '',
 
-throw new Error('No checkout URL returned');
+            // Business
+            companyName: nbnState.companyName || '',
+            tradingName: nbnState.tradingName || '',
+            abn: nbnState.abn || '',
+            dob:
+                nbnState.acctType === 'business'
+                    ? nbnState.dobBiz
+                    : nbnState.dob,
 
+            // Plan
+            planName: p.tag + ' NBN',
+            planSpeed: p.data,
+            planPrice: Number(p.price),
 
-} catch (err) {
+            // Modem
+            modemChoice: nbnState.modemChoice,
+            modemSize: nbnState.modemSize,
+            modemPrice: Number(modemPrice),
 
+            totalPrice: total,
+            stripeAmount: total * 100,
 
-console.error(err);
+            // Service
+            installAddress: nbnState.installAddr,
 
-btn.disabled = false;
+            activationDate:
+                nbnState.asap
+                    ? null
+                    : nbnState.activationDate,
 
-btn.innerHTML = `
-  <span id="pay-txt">Pay & activate</span>
-  <svg width="14" height="14" fill="none" stroke="currentColor"
-  stroke-width="2.5" viewBox="0 0 24 24">
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-    <polyline points="12 5 19 12 12 19"></polyline>
-  </svg>
-`;
+            asap: nbnState.asap,
 
-document.getElementById('s4-err').textContent =
-  'Payment failed. Please try again.';
+            ntd: nbnState.ntd,
 
-document.getElementById('s4-err').classList.add('show');
+            source: 'webflow-nbn-signup'
 
-}
+        };
+
+        console.log("Sending payload", payload);
+
+        const response = await fetch(
+            "https://hook.eu1.make.com/9cjwqioh6l38gidsf3spbl98aqm8f5pe",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        const data = await response.json();
+
+        console.log("Stripe response", data);
+
+        if (data.url) {
+
+            localStorage.setItem("foxus_nbn_done", "1");
+
+            saveNbnState();
+
+            window.location.href = data.url;
+
+            return;
+
+        }
+
+        throw new Error("No checkout URL returned");
+
+    }
+    catch (err) {
+
+        console.error(err);
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            <span id="pay-txt">Pay $${document.getElementById("ord-total").textContent.replace("$","")} & activate</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
+
+        document.getElementById("s4-err").textContent =
+            "Payment failed. Please try again.";
+
+        document.getElementById("s4-err").classList.add("show");
+
+    }
+
 }
 
 
@@ -680,3 +715,29 @@ function showSuccessScreen() {
 // RUN
 // ══════════════════════════════════
 init();
+
+// Payment Consent
+const consent = document.getElementById("paymentConsent");
+
+if (consent) {
+
+    consent.addEventListener("change", function () {
+
+        document.getElementById("consent-err").classList.remove("show");
+
+        const btn = document.getElementById("pay-btn");
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            <span id="pay-txt">${document.getElementById("pay-txt").textContent}</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        `;
+
+    });
+
+}
