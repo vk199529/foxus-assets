@@ -802,7 +802,7 @@ async function startKyc() {
 
         const data = await response.json();
 
-        console.log(data);
+        
 
         if (!data.url || !data.id)
             throw new Error("Invalid KYC response");
@@ -907,7 +907,7 @@ async function checkKycStatus(){
 
         const text = await response.text();
 
-        console.log("KYC Status:",text);
+      
 
         if(text.trim().toLowerCase()==="true"){
 
@@ -1083,7 +1083,7 @@ document.getElementById("consent-err").classList.remove("show");
 
 };
 
-    console.log('Payment payload:', payload);
+  
 
     const res  = await fetch("https://hook.eu1.make.com/9cjwqioh6l38gidsf3spbl98aqm8f5pe", {
       method: 'POST',
@@ -1091,7 +1091,7 @@ document.getElementById("consent-err").classList.remove("show");
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    console.log('Stripe response:', data);
+    
 
     if (data.url) {
 
