@@ -511,11 +511,19 @@ function updateOrderSummary() {
   const p = nbnState.selectedPlan;
   const modemPrice = nbnState.modemChoice === 'foxus' ? (nbnState.modemSize === 3 ? 399 : 199) : 0;
   // const total = p.price + modemPrice;
-  const subtotal = p.price + modemPrice;
+ const subtotal = Number(p.price) + modemPrice;
 
 const gst = subtotal / 11;
 
 const total = subtotal;
+
+console.log("========== ORDER ==========");
+console.log("Plan Price:", p.price);
+console.log("Modem Price:", modemPrice);
+console.log("Subtotal:", subtotal);
+console.log("GST:", gst);
+console.log("Total:", total);
+console.log("===========================");
 
   document.getElementById('ord-plan').textContent   = p.tag;
   document.getElementById('ord-detail').textContent = p.data + ' download';
