@@ -101,29 +101,9 @@ function init() {
   const flowParam    = params.get('flow');
   const planParam    = params.get('plan');
   const successParam = params.get('success');
-  const cancelled    = params.get('cancel');
 
-  // ───────────────────────────────
-// Stripe Cancel Return
-// ───────────────────────────────
-if (cancelled === "1") {
 
-    loadNbnState();
 
-    restoreFormValues();
-
-    updateOrderSummary();
-
-    goTo(4);
-
-    window.history.replaceState(
-        {},
-        document.title,
-        `/signup-nbn?flow=${nbnState.flow}&plan=${nbnState.planSlug}`
-    );
-
-    return;
-}
 
   // ───────────────────────────────
   // Stripe Success Return
@@ -198,7 +178,7 @@ if (cancelled === "1") {
   // ───────────────────────────────
   nbnState = getDefaultState();
 
-  nbnState.flow = flowParam;
+  
   nbnState.planSlug = planParam;
 
 nbnState.selectedPlan = NBN_PLANS[planParam];
