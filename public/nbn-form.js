@@ -518,9 +518,14 @@ const total = subtotal;
 
   document.getElementById('ord-plan').textContent   = p.tag;
   document.getElementById('ord-detail').textContent = p.data + ' download';
-  document.getElementById('ord-price').textContent  = '$' + p.price + '.00';
-  document.getElementById('ord-gst').textContent    =  '$' + gst.toFixed(2);
-  document.getElementById('ord-total').textContent  =   '$' + total.toFixed(2);
+  document.getElementById('ord-price').textContent =
+    `$${p.price.toFixed(2)}`;
+
+document.getElementById('ord-gst').textContent =
+    `$${gst.toFixed(2)}`;
+
+document.getElementById('ord-total').textContent =
+    `$${total.toFixed(2)}`;
   document.getElementById('pay-txt').textContent    =   'Pay $' + total.toFixed(2) + ' & activate';
 
   const modemLine = document.getElementById('ord-modem-line');
