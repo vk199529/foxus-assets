@@ -35,6 +35,9 @@ const NBN_PLANS = {
 function getDefaultState() {
 
   return {
+
+    planSlug: "",
+
     acctType: 'personal',
 
     selectedPlan: null,
@@ -52,11 +55,11 @@ function getDefaultState() {
     dob: '',
     address: '',
 
-     companyName: '',
-     tradingName: '',
-     abn: '',
-     dobBiz: '',
-     bizAddress: '',
+    companyName: '',
+    tradingName: '',
+    abn: '',
+    dobBiz: '',
+    bizAddress: '',
 
     installAddr: '',
     activationDate: '',
@@ -111,12 +114,12 @@ if (cancelled === "1") {
 
     updateOrderSummary();
 
-    goTo(4); // Payment step
+    goTo(4);
 
     window.history.replaceState(
         {},
         document.title,
-        `/signup-nbn?flow=${flowParam}&plan=${planParam}`
+        `/signup-nbn?flow=${nbnState.flow}&plan=${nbnState.planSlug}`
     );
 
     return;
@@ -194,6 +197,9 @@ if (cancelled === "1") {
   // Fresh signup
   // ───────────────────────────────
   nbnState = getDefaultState();
+
+  nbnState.flow = flowParam;
+  nbnState.planSlug = planParam;
 
 nbnState.selectedPlan = NBN_PLANS[planParam];
 
