@@ -518,13 +518,7 @@ const gst = subtotal / 11;
 // GST add karke total
 const total = subtotal + gst;
 
-console.log("========== ORDER ==========");
-console.log("Plan Price:", p.price);
-console.log("Modem Price:", modemPrice);
-console.log("Subtotal:", subtotal);
-console.log("GST:", gst);
-console.log("Total:", total);
-console.log("===========================");
+
 
   document.getElementById('ord-plan').textContent   = p.tag;
   document.getElementById('ord-detail').textContent = p.data + ' download';
@@ -640,7 +634,7 @@ async function processPayment() {
 
         };
 
-        console.log("Sending payload", payload);
+      
 
         const response = await fetch(
             "https://hook.eu1.make.com/9cjwqioh6l38gidsf3spbl98aqm8f5pe",
@@ -655,7 +649,7 @@ async function processPayment() {
 
         const data = await response.json();
 
-        console.log("Stripe response", data);
+        
 
         if (data.url) {
 
