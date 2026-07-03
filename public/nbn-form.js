@@ -119,7 +119,7 @@ if (cancelled === "1") {
 
     saveNbnState();
 
-    goTo(0);
+    goTo(4);
 
     return;
 }
