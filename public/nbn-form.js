@@ -111,7 +111,18 @@ function init() {
     goTo(5);
     showSuccessScreen();
 
+const cancelled = params.get("cancel");
 
+if (cancelled === "1") {
+
+    nbnState.currentStep = 0;
+
+    saveNbnState();
+
+    goTo(0);
+
+    return;
+}
 
     // remove success param from URL
     window.history.replaceState(
