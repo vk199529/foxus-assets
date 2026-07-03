@@ -980,11 +980,8 @@ function updateOrderSummary() {
 // PAYMENT
 // ══════════════════════════════════
 async function processPayment() {
-  const btn = document.getElementById('pay-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span style="opacity:.7">Redirecting to payment...</span>';
-
-  const consent = document.getElementById("paymentConsent");
+    
+    const consent = document.getElementById("paymentConsent");
 
 if (!consent.checked) {
 
@@ -997,6 +994,12 @@ if (!consent.checked) {
 }
 
 document.getElementById("consent-err").classList.remove("show");
+
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="opacity:.7">Redirecting to payment...</span>';
+
+  
 
   try {
     const p = mState.selectedPlan;
