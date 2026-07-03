@@ -151,6 +151,7 @@ function init() {
   // Restore existing session
   // ───────────────────────────────
   const restored = loadNbnState();
+  nbnState.selectedPlan = NBN_PLANS[planParam];
 
   if (
     restored &&
@@ -160,6 +161,7 @@ function init() {
     restoreFormValues();
 
     updateOrderSummary();
+    saveNbnState();
 
     goTo(nbnState.currentStep || 0);
 
@@ -169,15 +171,17 @@ function init() {
   // ───────────────────────────────
   // Fresh signup
   // ───────────────────────────────
-  nbnState.selectedPlan = NBN_PLANS[planParam];
+  nbnState = getDefaultState();
 
-  nbnState.currentStep = 0;
+nbnState.selectedPlan = NBN_PLANS[planParam];
 
-  saveNbnState();
+nbnState.currentStep = 0;
 
-  updateOrderSummary();
+saveNbnState();
 
-  goTo(0);
+updateOrderSummary();
+
+goTo(0);
 }
 
 function restoreFormValues() {
