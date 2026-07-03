@@ -2,10 +2,63 @@
 // PLANS
 // ══════════════════════════════════
 const MOBILE_PLANS = {
-  'stay-connected': { tag:'Stay Connected', data:'29 GB', price:29 },
-  'everyday':       { tag:'Everyday',       data:'32 GB', price:35 },
-  'work-play':      { tag:'Work & Play',    data:'90 GB', price:45 },
-  'indulge':        { tag:'Indulge',        data:'150 GB', price:55 }
+  "stay-connected": {
+    tag: "Stay Connected",
+    data: "25 GB",
+    price: 25,
+    network: "5G",
+    description: "For light users covering calls, texts & occasional data",
+    features: [
+      "Unlimited calls & texts in Australia",
+      "Unlimited calls & SMS to 15 countries",
+      "Data Vault: save up to 500 GB unused data",
+      "eSIM or SIM, activate online",
+      "VoLTE & Wi-Fi calling supported"
+    ]
+  },
+
+  "everyday": {
+    tag: "Everyday",
+    data: "32 GB",
+    price: 35,
+    network: "5G",
+    description: "Great for streaming, browsing & daily use",
+    features: [
+      "Unlimited talk & text in Australia",
+      "Unlimited calls & SMS to 15 countries",
+      "Data Vault: save up to 500 GB unused data",
+      "eSIM or SIM, activate online",
+      "VoLTE & Wi-Fi calling supported"
+    ]
+  },
+
+  "work-play": {
+    tag: "Work & Play",
+    data: "90 GB",
+    price: 45,
+    network: "5G",
+    description: "Ideal for heavy data users & international calling",
+    features: [
+      "Unlimited Australian & international calls & texts",
+      "Data Vault: save up to 500 GB unused data",
+      "eSIM or SIM, activate online",
+      "VoLTE & Wi-Fi calling supported"
+    ]
+  },
+
+  "indulge": {
+    tag: "Indulge",
+    data: "150 GB",
+    price: 55,
+    network: "5G & 4G",
+    description: "Perfect for power users who stream, work & game on the go",
+    features: [
+      "Unlimited Australian & international calls & texts",
+      "Data Vault: save up to 500 GB unused data",
+      "eSIM or SIM, activate online",
+      "VoLTE & Wi-Fi calling supported"
+    ]
+  }
 };
 
 // ══════════════════════════════════
