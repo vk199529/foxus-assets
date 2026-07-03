@@ -594,6 +594,7 @@ async function processPayment() {
         const payload = {
 
             flow: 'nbn',
+            planSlug: nbnState.planSlug,
 
             // Customer
             email: nbnState.email,
