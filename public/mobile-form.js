@@ -198,9 +198,10 @@ function init() {
     const restored = loadState();
 
     // Restore selected plan if missing
-    if (!mState.selectedPlan) {
-        mState.selectedPlan = MOBILE_PLANS[planParam];
-    }
+    // if (!mState.selectedPlan) {
+    //     mState.selectedPlan = MOBILE_PLANS[planParam];
+    // }
+    mState.selectedPlan = MOBILE_PLANS[planParam];
 
     if (
         restored &&
