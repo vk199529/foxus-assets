@@ -736,11 +736,11 @@ function showSuccessScreen() {
   nbnState = getDefaultState();
 
   // redirect after 4 sec
-  setTimeout(function () {
+  // setTimeout(function () {
 
-    window.location.href = "/";
+  //   window.location.href = "/";
 
-  }, 4000);
+  // }, 4000);
 
 }
 // ══════════════════════════════════
