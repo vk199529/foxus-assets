@@ -1161,11 +1161,11 @@ function showSuccess() {
 
     mState = getDefaultMobileState();
 
-    setTimeout(() => {
+    // setTimeout(() => {
 
-        window.location.replace("/mobile-plan");
+    //     window.location.replace("/mobile-plan");
 
-    }, 4000);
+    // }, 4000);
 
 }
 // ══════════════════════════════════
