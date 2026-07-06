@@ -522,6 +522,9 @@ function validateStep2() {
 // ══════════════════════════════════
 // STEP 3 — OTP via Twilio/Make.com
 // ══════════════════════════════════
+// ══════════════════════════════════
+// STEP 3 — OTP via Twilio/Make.com
+// ══════════════════════════════════
 async function sendOtp() {
 
     const phone = document.getElementById('phoneNumber').value.trim();
@@ -532,7 +535,6 @@ async function sendOtp() {
     inp.classList.remove('err');
     errEl.classList.remove('show');
 
-    // Validate
     if (!phone) {
         inp.classList.add('err');
         errEl.textContent = 'Please enter your mobile number.';
@@ -540,26 +542,53 @@ async function sendOtp() {
         return;
     }
 
-    const cleaned = phone.replace(/\s/g, '');
+    // Remove spaces, brackets and dashes
+    const raw = phone.replace(/\D/g, "");
 
-    const isAU   = /^(\+61|0)[4-5]\d{8}$/.test(cleaned);
-    const isIN   = /^\+91[6-9]\d{9}$/.test(cleaned);
-    const isIntl = /^\+\d{7,15}$/.test(cleaned);
+    let formattedPhone = "";
 
-    if (!isAU && !isIN && !isIntl) {
+    // Already international
+    if (phone.startsWith("+")) {
+
+        if (/^\+\d{7,15}$/.test(phone.replace(/\s/g, ""))) {
+
+            formattedPhone = phone.replace(/\s/g, "");
+
+        }
+
+    }
+    // Australia with leading 0
+    else if (raw.length === 10 && raw.startsWith("04")) {
+
+        formattedPhone = "+61" + raw.substring(1);
+
+    }
+    // Australia without leading 0
+    else if (raw.length === 9 && raw.startsWith("4")) {
+
+        formattedPhone = "+61" + raw;
+
+    }
+    // India local
+    else if (raw.length === 10 && /^[6-9]/.test(raw)) {
+
+        formattedPhone = "+91" + raw;
+
+    }
+    else {
 
         inp.classList.add('err');
 
         errEl.textContent =
-            'Please enter a valid number. e.g. +61 412 345 678 or +91 98765 43210';
+            'Please enter a valid Australian or Indian mobile number.';
 
         errEl.classList.add('show');
 
         return;
     }
 
-   
-    mState.phone = phone;
+    // Save formatted number
+    mState.phone = formattedPhone;
     saveState();
 
     const btn = document.getElementById('send-otp-btn');
@@ -577,7 +606,7 @@ async function sendOtp() {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    phone: phone
+                    phone: formattedPhone
                 })
             }
         );
@@ -587,13 +616,13 @@ async function sendOtp() {
         if (data.success) {
 
             document.getElementById('otp-sent-to').textContent =
-                'Code sent to ' + phone;
+                'Code sent to ' + formattedPhone;
 
             document.getElementById('otp-box').style.display = 'block';
             document.getElementById('otp-nav').style.display = 'block';
             document.getElementById('verify-back').style.display = 'none';
 
-            // Clear old OTP
+            // Clear previous OTP
             for (let i = 0; i < 6; i++) {
                 document.getElementById('otp' + i).value = '';
             }
@@ -642,7 +671,6 @@ async function sendOtp() {
 
         errEl.classList.add('show');
     }
-
 }
 
 // OTP Navigation
