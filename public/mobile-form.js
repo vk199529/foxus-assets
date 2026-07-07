@@ -66,8 +66,9 @@ const MOBILE_PLANS = {
 // ══════════════════════════════════
 function getDefaultMobileState() {
   return {
+    planSlug: "",
     acctType: 'personal',
-
+    
     selectedPlan: null,
 
     portNumber: 'yes',
@@ -143,6 +144,25 @@ function init() {
 
     const planParam = params.get("plan");
     const success = params.get("success");
+    const cancelled = params.get("cancel");
+
+
+    if (cancelled === "1") {
+
+        localStorage.removeItem("foxus_nbn_done");
+
+        loadNbnState();
+
+        restoreFormValues();
+
+        updateOrderSummary();
+
+        goTo(5);
+
+        return;
+    }
+
+
 
     // ==========================
     // Stripe Success
@@ -221,6 +241,8 @@ function init() {
     // Fresh Signup
     // ==========================
     mState = getDefaultMobileState();
+
+    mState.planSlug = planParam;
 
     mState.selectedPlan = MOBILE_PLANS[planParam];
 
@@ -1041,6 +1063,7 @@ document.getElementById("consent-err").classList.remove("show");
 
     flow: "mobile",
 
+   planSlug: mState.planSlug,
     
     acctType: mState.acctType,
 
