@@ -603,7 +603,7 @@ async function processPayment() {
 
         const gst = subtotal / 11;
 
-        const total = subtotal + gst;
+        const total = subtotal;
 
         const payload = {
 
