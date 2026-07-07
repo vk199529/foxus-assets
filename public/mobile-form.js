@@ -978,9 +978,9 @@ function updateOrderSummary() {
 
     const p = mState.selectedPlan;
 
-    const gst = Number((p.price * 0.10).toFixed(2));
+    const gst = Number((total / 11).toFixed(2));
 
-    const total = Number((p.price).toFixed(2));
+    const total = Number(p.price);
 
     document.getElementById("ord-plan").textContent = p.tag;
 
@@ -991,10 +991,10 @@ function updateOrderSummary() {
         `$${p.price.toFixed(2)}`;
 
     document.getElementById("ord-gst").textContent =
-        `$${gst.toFixed(2)}`;
+    `$${gst.toFixed(2)}`;
 
     document.getElementById("ord-total").textContent =
-        `$${total.toFixed(2)}`;
+    `$${total.toFixed(2)}`;
 
     document.getElementById("pay-txt").textContent =
         `Pay $${total.toFixed(2)} & Activate`;
