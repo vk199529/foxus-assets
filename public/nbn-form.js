@@ -532,13 +532,13 @@ function updateOrderSummary() {
   if (!nbnState.selectedPlan) return;
   const p = nbnState.selectedPlan;
   const modemPrice = nbnState.modemChoice === 'foxus' ? (nbnState.modemSize === 3 ? 399 : 199) : 0;
-  // const total = p.price + modemPrice;
-const subtotal = Number(p.price) + modemPrice;
+      // const total = p.price + modemPrice;
+    const subtotal = Number(p.price) + modemPrice;
 
-const gst = subtotal / 11;
+    const gst = subtotal / 11;
 
-// GST add karke total
-const total = subtotal + gst;
+    // GST add karke total
+    const total = subtotal;
 
 
 
@@ -547,12 +547,12 @@ const total = subtotal + gst;
   document.getElementById('ord-price').textContent =
     `$${p.price.toFixed(2)}`;
 
-document.getElementById('ord-gst').textContent =
-    `$${gst.toFixed(2)}`;
+  document.getElementById('ord-gst').textContent =
+      `$${gst.toFixed(2)}`;
 
-document.getElementById('ord-total').textContent =
-    `$${total.toFixed(2)}`;
-  document.getElementById('pay-txt').textContent    =   'Pay $' + total.toFixed(2) + ' & activate';
+  document.getElementById('ord-total').textContent =
+      `$${total.toFixed(2)}`;
+    document.getElementById('pay-txt').textContent    =   'Pay $' + total.toFixed(2) + ' & activate';
 
   const modemLine = document.getElementById('ord-modem-line');
   if (nbnState.modemChoice === 'foxus') {

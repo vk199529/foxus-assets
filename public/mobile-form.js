@@ -522,9 +522,6 @@ function validateStep2() {
 // ══════════════════════════════════
 // STEP 3 — OTP via Twilio/Make.com
 // ══════════════════════════════════
-// ══════════════════════════════════
-// STEP 3 — OTP via Twilio/Make.com
-// ══════════════════════════════════
 async function sendOtp() {
 
     const phone = document.getElementById('phoneNumber').value.trim();
