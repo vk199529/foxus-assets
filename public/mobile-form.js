@@ -977,10 +977,12 @@ function updateOrderSummary() {
     if (!mState.selectedPlan) return;
 
     const p = mState.selectedPlan;
+    
+    const total = Number(p.price);
 
     const gst = Number((total / 11).toFixed(2));
 
-    const total = Number(p.price);
+    
 
     document.getElementById("ord-plan").textContent = p.tag;
 
