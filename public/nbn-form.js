@@ -233,7 +233,7 @@ function restoreFormValues() {
 
   // Restore modem
   if (nbnState.modemChoice) {
-    selectModemSize(nbnState.modemSize || 1);
+    selectModemSize(nbnState.modemSize || 1,true);
     selectModem(nbnState.modemChoice);
   }
 
@@ -420,9 +420,12 @@ function toggleAsap() {
   saveNbnState();
 }
 
-function selectModemSize(n) {
+function selectModemSize(n, restore = false) {
   nbnState.modemSize   = n;
-  nbnState.modemChoice = null;
+  // nbnState.modemChoice = null;
+      if (!restore) {
+        nbnState.modemChoice = null;
+    }
   document.getElementById('tog-1').classList.toggle('active', n === 1);
   document.getElementById('tog-3').classList.toggle('active', n === 3);
   document.getElementById('modem-card-1').style.display = n === 1 ? 'flex' : 'none';
