@@ -977,7 +977,7 @@ function updateOrderSummary() {
     if (!mState.selectedPlan) return;
 
     const p = mState.selectedPlan;
-    
+
     const total = Number(p.price);
 
     const gst = Number((total / 11).toFixed(2));
@@ -1030,9 +1030,12 @@ document.getElementById("consent-err").classList.remove("show");
 
   try {
     const p = mState.selectedPlan;
-    const gst = Number((p.price * 0.10).toFixed(2));
+    // const gst = Number((p.price * 0.10).toFixed(2));
 
-     const total = Number((p.price + gst).toFixed(2));
+    //  const total = Number((p.price + gst).toFixed(2));
+    const total = Number(p.price);
+
+    const gst = Number((total / 11).toFixed(2));
 
      const payload = {
 
