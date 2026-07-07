@@ -980,7 +980,7 @@ function updateOrderSummary() {
 
     const gst = Number((p.price * 0.10).toFixed(2));
 
-    const total = Number((p.price + gst).toFixed(2));
+    const total = Number((p.price).toFixed(2));
 
     document.getElementById("ord-plan").textContent = p.tag;
 
