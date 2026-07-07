@@ -149,7 +149,7 @@ function init() {
 
     if (cancelled === "1") {
 
-        localStorage.removeItem("foxus_mobile_state");
+        localStorage.removeItem("foxus_mobile_done");
 
         loadState();
 
@@ -218,10 +218,10 @@ function init() {
     const restored = loadState();
 
     // Restore selected plan if missing
-    // if (!mState.selectedPlan) {
-    //     mState.selectedPlan = MOBILE_PLANS[planParam];
-    // }
-    mState.selectedPlan = MOBILE_PLANS[planParam];
+     if (!mState.selectedPlan) {
+        mState.selectedPlan = MOBILE_PLANS[planParam];
+    }
+    // mState.selectedPlan = MOBILE_PLANS[planParam];
 
     if (
         restored &&
@@ -244,7 +244,9 @@ function init() {
 
     mState.planSlug = planParam;
 
-    mState.selectedPlan = MOBILE_PLANS[planParam];
+    // mState.selectedPlan = MOBILE_PLANS[planParam];
+    mState.selectedPlan =
+           mState.selectedPlan || MOBILE_PLANS[planParam];
 
     mState.currentStep = 0;
 
