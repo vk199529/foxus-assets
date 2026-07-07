@@ -149,9 +149,9 @@ function init() {
 
     if (cancelled === "1") {
 
-        localStorage.removeItem("foxus_nbn_done");
+        localStorage.removeItem("foxus_mobile_state");
 
-        loadNbnState();
+        loadState();
 
         restoreFormValues();
 
