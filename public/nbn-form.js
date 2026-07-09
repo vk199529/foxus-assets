@@ -218,6 +218,9 @@ function restoreFormValues() {
   set('companyName', nbnState.companyName);
   set('installAddr', nbnState.installAddr);
   set('activationDate', nbnState.activationDate);
+
+  set('bizfirstName', nbnState.firstName);
+  set('bizlastName', nbnState.lastName);
   set('bizEmail', nbnState.email);
   set('bizPhone', nbnState.phone);
   set('tradingName', nbnState.tradingName);
@@ -361,6 +364,8 @@ function validateStep1() {
     document.getElementById('fields-personal').style.display = 'none';
     document.getElementById('fields-business').style.display = '';
     const checks = [
+         {id:'bizfirstName', v: x => x.trim().length > 0},
+         {id:'bizlastName', v: x => x.trim().length > 0},
         { id:'companyName', v: x => x.trim().length > 0 },
         { id:'bizEmail',    v: x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
         // { id:'bizPhone',    v: x => /^[+]?[0-9\s()-]{10,15}$/.test(x.trim()) },
@@ -378,8 +383,8 @@ function validateStep1() {
       if (!ok) valid = false;
     });
     if (valid) {
-            nbnState.firstName = '';
-            nbnState.lastName = '';
+            nbnState.firstName = document.getElementById('bizfirstName').value.trim();
+            nbnState.lastName = document.getElementById('bizlastName').value.trim();
 
             nbnState.companyName = document.getElementById('companyName').value.trim();
 
