@@ -621,7 +621,7 @@ async function processPayment() {
             // Personal
             firstName: nbnState.firstName || '',
             lastName: nbnState.lastName || '',
-            address: bnState.address || '',
+            address: nbnState.address || '',
 
             // Business
             companyName: nbnState.companyName || '',
