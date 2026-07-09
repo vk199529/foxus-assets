@@ -273,6 +273,8 @@ function restoreFormValues() {
     set('address', mState.address);
 
     // Business
+    set('bizzfirstName', mState.firstName);
+    set('bizzlastName', mState.lastName);
     set('companyName', mState.companyName);
     set('tradingName', mState.tradingName);
     set('abn', mState.abn);
@@ -434,6 +436,8 @@ function validateStep1() {
     } else {
 
         const checks = [
+            {id:'bizzfirstName', v:x=>x.trim().length>0},
+            {id:'bizzlastName', v:x=>x.trim().length>0},
             { id:'companyName', v:x=>x.trim().length>0 },
             { id:'abn',         v:x=>x.trim().length>0 },
             { id:'bizEmail',    v:x=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x) },
@@ -464,8 +468,8 @@ function validateStep1() {
             mState.abn=document.getElementById('abn').value.trim();
 
             // Personal fields remain blank
-            mState.firstName='';
-            mState.lastName='';
+            mState.firstName=document.getElementById('bizzfirstName').value.trim();
+            mState.lastName=document.getElementById('bizzlastName').value.trim();
 
             // Shared fields
             mState.email=document.getElementById('bizEmail').value.trim();
