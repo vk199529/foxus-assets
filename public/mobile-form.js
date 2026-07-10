@@ -1093,12 +1093,8 @@ document.getElementById("consent-err").classList.remove("show");
         : mState.dob,
 
     
-    address:
-        mState.acctType === "business"
-        ? mState.bizAddress
-        : mState.address,
+    address: mState.address,
 
-    
     planName: p.tag,
 
     planData: p.data,
